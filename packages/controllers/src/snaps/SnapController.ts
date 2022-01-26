@@ -541,7 +541,7 @@ export class SnapController extends BaseController<
   _stopSnapsLastRequestPastMax() {
     this._lastRequestMap.forEach(async (timestamp, snapId) => {
       if (this._maxIdleTime && timeSince(timestamp) > this._maxIdleTime) {
-        this.stopSnap(snapId);
+        this._stopSnap(snapId);
       }
     });
   }
@@ -681,7 +681,10 @@ export class SnapController extends BaseController<
   private _stopSnap(snapId: SnapId, setNotRunning = true): void {
     this._lastRequestMap.delete(snapId);
     this._closeAllConnections(snapId);
-    this._terminateSnap(snapId);
+    if (this.isRunning(snapId)) {
+      this._terminateSnap(snapId);
+    }
+
     if (setNotRunning) {
       this._transitionSnapState(snapId, SnapStatusEvent.stop);
     }
